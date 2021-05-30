@@ -15,8 +15,8 @@ import sys
 import gc
 import datetime
 # from metpy import calc
-from metpy.calc import wind_speed,wind_direction,wind_components
-from metpy.units import units
+# from metpy.calc import wind_speed,wind_direction,wind_components
+# from metpy.units import units
 import numpy as np
 
 gc.collect()
@@ -294,26 +294,26 @@ while True:
         
         #calculando a resultante        
         # wheading = wdir2wheading(wdir)
-        wu,wv = wind_components(wspd * units('knots'), wdir * units.degree)
+        # wu,wv = wind_components(wspd * units('knots'), wdir * units.degree)
         wuu,wvv = spdir2uv(wspd, wdir, deg = True)
               
         #o vetor do barco e do vento tem direcoes contrarias, por causa da convecao de onde o vento vem,
-        boatu,boatv = wind_components(boatspd * units('knots'), boathdt * units.degree)
+        # boatu,boatv = wind_components(boatspd * units('knots'), boathdt * units.degree)
         boatuu,boatvv = spdir2uv(boatspd,boathdt,deg = True)
         
         #Calculando a resultante
         #velocidade medida = velocidade barco + velocidade real
         #velocidade real = velocidade medida - velocidade barco.
         #usando a lib metpy
-        wTu = wu - boatu 
-        wTv = wv - boatv 
+        # wTu = wu - boatu 
+        # wTv = wv - boatv 
         
         #usando funcao spdir2uv
         wTuu = wuu - boatuu 
         wTvv = wvv - boatvv        
         
-        wspdT = float(wind_speed(wTu,wTv).magnitude)
-        wdirT = float(wind_direction(wTu,wTv).magnitude)
+        # wspdT = float(wind_speed(wTu,wTv).magnitude)
+        # wdirT = float(wind_direction(wTu,wTv).magnitude)
         
         wdirTT,wspdTT = uv2spdir(wTuu, wTvv)
         
@@ -321,7 +321,8 @@ while True:
         lat = rmc.lat + ' ' + rmc.lat_dir
         lon = rmc.lon + ' ' + rmc.lon_dir        
         
-        buff2 = "wspdT=%.2f wdirT=%.2f"%(wspdT,wdirT) 
+        buff2 = ""
+        # buff2 += "wspdT=%.2f wdirT=%.2f"%(wspdT,wdirT) 
         buff2 += " wspdTT=%.2f wdirTT=%.2f"%(wspdTT,wdirTT) 
         buff2 += " wspd=%.2f wdir=%.2f"%(wspd,wdir)
         buff2 += " boatspd=%.2f boatdir=%.2f"%(boatspd,boathdt)
@@ -331,7 +332,8 @@ while True:
         
         #%%
         
-        buff += "%.2f,%.2f,"%(wspdT,wdirT) 
+        # buff += "%.2f,%.2f,"%(wspdT,wdirT) 
+        buff += "%.2f,%.2f,"%(wspdTT,wdirTT) 
         buff += "%.2f,%.2f,"%(wspd,wdir)
         buff += "%.2f,%.2f,"%(boatspd,boathdt)
         buff += "%s,%s,"%(lat,lon)
