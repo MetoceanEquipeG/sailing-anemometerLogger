@@ -1,0 +1,8 @@
+{
+    "legSER": "comport e baudrate se referem a porta serial do anemometro",
+    "comport": "COM30",
+    "baudrate": 19200,
+    "legTCP": "TCP_IP e TCP_PORT se referem ao endereco de IP do PC da navegacao e a porta aberta no Hypack Shared Memory",
+    "TCP_IP": "127.0.0.1",
+    "TCP_PORT": 8001
+}
