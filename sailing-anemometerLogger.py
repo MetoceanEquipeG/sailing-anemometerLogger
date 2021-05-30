@@ -88,7 +88,7 @@ wspdT,wdirT,wspd,wdir,boatspd,boatdir,lat,lon,gpstime
 
 wspdT = velocidade corrigida 
 wdirT = direcao corrigida com relacao ao norte verdadeiro (de onde vem)
-wspd = velocidade medida
+wspd = velocidade medida pelo anemometro no barco
 wdir = direcao medida sem correcao de heading (de onde vem)
 boatspd = velocidade do navio calculada pelo Hypack ou equivalente
 boatdir = heading do navio norte verdadeiro (para onde vai)
@@ -184,11 +184,14 @@ def uv2spdir(u, v, mag=0, rot=0):
     ang = np.angle(vec, deg=True)
     ang = ang - mag + rot
     ang = np.mod(90. - ang, 360.)  # Zero is North.
- 
     return ang, spd
 
-
-
+def wdir2wheading(deg):
+    wheading = deg + 180 #wh wind heading
+    if wheading > 360:
+        wheading = wheading - 360
+    return wheading
+    
 #%%#Abrindo a porta TCP para captura de string nmea
 TCP_IP = TCP_IP
 TCP_PORT = TCP_PORT
@@ -282,31 +285,51 @@ while True:
                 sys.exit(13)
                 pass
             pass
-    
+        #%%
+        # wspd = 10 # Lembrando que wspd e a velocidade que o barco esta medindo
+        # wdir = 225
+
+        # boatspd = 10
+        # boathdt = 45
+        
         #calculando a resultante        
+        # wheading = wdir2wheading(wdir)
         wu,wv = wind_components(wspd * units('knots'), wdir * units.degree)
-        
+        wuu,wvv = spdir2uv(wspd, wdir, deg = True)
+              
         #o vetor do barco e do vento tem direcoes contrarias, por causa da convecao de onde o vento vem,
-        #mas o vetor do barco nao precisa ser girado pois essa funcao ja calcula o vetor invertido.
         boatu,boatv = wind_components(boatspd * units('knots'), boathdt * units.degree)
+        boatuu,boatvv = spdir2uv(boatspd,boathdt,deg = True)
         
+        #Calculando a resultante
         #velocidade medida = velocidade barco + velocidade real
         #velocidade real = velocidade medida - velocidade barco.
-        wTu = wu - boatu
-        wTv = wv - boatv
+        #usando a lib metpy
+        wTu = wu - boatu 
+        wTv = wv - boatv 
+        
+        #usando funcao spdir2uv
+        wTuu = wuu - boatuu 
+        wTvv = wvv - boatvv        
         
         wspdT = float(wind_speed(wTu,wTv).magnitude)
         wdirT = float(wind_direction(wTu,wTv).magnitude)
+        
+        wdirTT,wspdTT = uv2spdir(wTuu, wTvv)
+        
         
         lat = rmc.lat + ' ' + rmc.lat_dir
         lon = rmc.lon + ' ' + rmc.lon_dir        
         
         buff2 = "wspdT=%.2f wdirT=%.2f"%(wspdT,wdirT) 
+        buff2 += " wspdTT=%.2f wdirTT=%.2f"%(wspdTT,wdirTT) 
         buff2 += " wspd=%.2f wdir=%.2f"%(wspd,wdir)
         buff2 += " boatspd=%.2f boatdir=%.2f"%(boatspd,boathdt)
         buff2 += " lat=%s lon=%s"%(lat,lon)
         buff2 += " gpstime=%s \n"%(gpstime)
         print(buff2)
+        
+        #%%
         
         buff += "%.2f,%.2f,"%(wspdT,wdirT) 
         buff += "%.2f,%.2f,"%(wspd,wdir)
